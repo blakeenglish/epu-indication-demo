@@ -44,11 +44,11 @@ class EngineVisualizerTk:
 
         power_frac = self.engine.power_ratio_for_i_60
         #power_frac = max(0.0, min(1.0, power_frac))
-        self.draw_power_marker(cx, cy, r, power_arc_starting_angle_in_degrees, total_arc_angle, power_frac, color='white', name='P_I60')
+        self.draw_power_marker(cx, cy, r, power_arc_starting_angle_in_degrees, total_arc_angle, power_frac, color='white', name='P_I60', inner_radius_offset=-50)
 
         temp_frac = self.engine.temperature_inverter_60 / (self.engine.temperature_upper_redline - self.engine.temperature_lower_redline)
             #temp_frac = max(0.0, min(1.0, temp_frac))
-        self.draw_temperature_marker(cx, cy, r, temperature_arc_starting_angle_in_degrees, total_arc_angle, temp_frac, color='white', name='I60')
+        self.draw_temperature_marker(cx, cy, r, temperature_arc_starting_angle_in_degrees, total_arc_angle, temp_frac, color='white', name='T_I60')
 
         power_frac = self.engine.power_ratio_for_vto_30
         #power_frac = max(0.0, min(1.0, power_frac))
@@ -57,8 +57,21 @@ class EngineVisualizerTk:
         power_frac = self.engine.power_ratio_for_steady_state_temperature_for_upper_redline
         #power_frac = max(0.0, min(1.0, power_frac))
         self.draw_power_marker(cx, cy, r, power_arc_starting_angle_in_degrees, total_arc_angle, power_frac, color='white', name='P_SSMax')
-        
 
+        temp_frac = self.engine.trend_temperature / (self.engine.temperature_upper_redline - self.engine.temperature_lower_redline)
+            #temp_frac = max(0.0, min(1.0, temp_frac))
+            
+        trend_mark_color = 'green2'
+        if self.engine.trend_temperature > self.max_temp * 0.95:
+            trend_mark_color = 'red'
+        elif self.engine.trend_temperature < self.engine.temperature_inverter_60:
+            trend_mark_color = 'green2'
+        else:
+            trend_mark_color = 'yellow'
+
+        self.draw_temperature_marker(cx, cy, r, temperature_arc_starting_angle_in_degrees, total_arc_angle, temp_frac, color=trend_mark_color, name='5s')
+        
+        self.draw_temperature_marker(cx, cy, r, temperature_arc_starting_angle_in_degrees, total_arc_angle, 1.0, color='red', name='')
 
         # Draw power needle
         angle = power_arc_starting_angle_in_degrees + total_arc_angle * self.engine.power
@@ -74,23 +87,25 @@ class EngineVisualizerTk:
         else:
             arc_color = 'yellow'
             #self.draw_arrow(self, cx, cy, 30, 90, 'orange', 0, 20, 8)
-            self.draw_arrow(cx, cy, r*0.75, 45, 'yellow', -45, 40, 16)
+            self.draw_arrow(cx, cy, r*0.75, 65, 'yellow', -(90-65+5), 40, 16)
+            self.draw_arrow(cx, cy, r*0.75, 45, 'yellow', -(90-45+5), 40, 16)
+            self.draw_arrow(cx, cy, r*0.75, 25, 'yellow', -(90-25+5), 40, 16)
 
         self._draw_arc(cx, cy, r, temperature_arc_starting_angle_in_degrees, temp_angle, width=10, color=arc_color)
         # Draw labels
         self.canvas.create_text(cx, cy+100, text=f"{self.engine.name}", font=('Arial', 16, 'bold'), fill='white')
-        self.canvas.create_text(cx, cy+70, text=f"Power: {int(self.engine.power*100)}%", font=('Arial', 12), fill='white')
-        self.canvas.create_text(cx, cy+130, text=f"Temp: {self.engine.temp:.1f}%", font=('Arial', 12), fill='white')
+        self.canvas.create_text(cx, cy+70, text=f"Avg Power: {int(self.engine.power*100)}%", font=('Arial', 12), fill='white')
+        self.canvas.create_text(cx, cy+130, text=f"Max Temp: {self.engine.temp:.1f}%", font=('Arial', 12), fill='white')
         #self.canvas.create_text(cx, cy+80, text=f"Power 60: {self.engine.power_ratio_for_steady_state_temperature_for_inverter_60:.1f}%", font=('Arial', 12), fill='white')
 
-    def draw_power_marker(self, cx, cy, r, arc_start_deg, arc_total_angle, power_frac, color='blue', name=None):
+    def draw_power_marker(self, cx, cy, r, arc_start_deg, arc_total_angle, power_frac, color='blue', name=None, inner_radius_offset = -32):
         """
         Draw a perpendicular marker line on the power arc at the given power fraction (0-1).
         Optionally label it with 'name'.
         """
         angle = arc_start_deg + arc_total_angle * power_frac
         angle_rad = math.radians(angle-90)
-        inner = r-32
+        inner = r + inner_radius_offset
         outer = r-8
         x0 = cx + inner * math.cos(angle_rad)
         y0 = cy + inner * math.sin(angle_rad)
