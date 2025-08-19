@@ -8,17 +8,17 @@ class Engine:
         self.temperature_upper_redline = 100.0
         self.temperature_lower_redline = 0
         self.temperature_inverter_60 = 50.0
-        self.power_for_steady_state_temperature_for_inverter_60 = 0.5
-        
-        
-        
-        
+        self.power_ratio_for_steady_state_temperature_for_inverter_60 = 0.5
+        self.takeoff_temperature_limit = 30.0
 
     def update(self, outside_temp, dt=1.0):
  
         target_temp = self.temperature_inverter_60
         required_power = (self.heat_rej_coeff * (target_temp - outside_temp)) / self.heat_gen_coeff
-        self.power_for_steady_state_temperature_for_inverter_60 = max(0.0, min(1.0, required_power))
+        self.power_ratio_for_steady_state_temperature_for_inverter_60 = max(0.0, min(1.0, required_power))
+        
+        
+        
             
             
         # Heat generated is proportional to power

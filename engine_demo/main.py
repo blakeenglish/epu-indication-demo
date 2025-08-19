@@ -19,7 +19,7 @@ current_engine_idx = 0
 root = tk.Tk()
 root.title("Engine Temperature Visualizer")
 
-visualizers = [EngineVisualizerTk(root, engine, x=20+i*340, y=20, size=300) for i, engine in enumerate(engines)]
+visualizers = [EngineVisualizerTk(root, engine, x=40+i*340, y=40, size=400) for i, engine in enumerate(engines)]
 
 def update():
     for engine in engines:
