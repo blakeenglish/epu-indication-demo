@@ -18,7 +18,7 @@ class EngineVisualizerTk:
         cy = self.size//2 + 40
         r = self.size//2
 
-        total_arc_angle = 270 #it would be more user friendly to define these as end points, but this seems more robust
+        total_arc_angle = 270
         temperature_arc_starting_angle_in_degrees = 225
         power_arc_starting_angle_in_degrees = 225
         # Draw gauge background
@@ -30,13 +30,19 @@ class EngineVisualizerTk:
         self._draw_needle(cx, cy, r-40, angle, color='red', width=5)
         # Draw temperature arc
         temp_pct = (self.engine.temp - self.min_temp) / (self.max_temp - self.min_temp)
-        temp_pct = max(0, min(1, temp_pct))
         temp_angle = temperature_arc_starting_angle_in_degrees + total_arc_angle * temp_pct
-        self._draw_arc(cx, cy, r, temperature_arc_starting_angle_in_degrees, temp_angle, width=10, color='orange')
+        if self.engine.temp > self.max_temp:
+            arc_color = 'red'
+        elif temp_pct < 0.9:
+            arc_color = 'green2'
+        else:
+            arc_color = 'orange'
+        self._draw_arc(cx, cy, r, temperature_arc_starting_angle_in_degrees, temp_angle, width=10, color=arc_color)
         # Draw labels
         self.canvas.create_text(cx, cy+30, text=f"{self.engine.name}", font=('Arial', 16, 'bold'))
         self.canvas.create_text(cx, cy-20, text=f"Power: {int(self.engine.power*100)}%", font=('Arial', 12))
         self.canvas.create_text(cx, cy+60, text=f"Temp: {self.engine.temp:.1f}°C", font=('Arial', 12))
+        self.canvas.create_text(cx, cy+80, text=f"Power 60: {self.engine.power_for_steady_state_temperature_for_inverter_60:.1f}%", font=('Arial', 12))
 
     def _draw_arc(self, cx, cy, r, start_deg, end_deg, width=10, color='orange'):
         # Redefine 0 deg as up, increasing clockwise, 90 deg is right
