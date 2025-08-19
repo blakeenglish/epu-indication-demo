@@ -5,12 +5,12 @@ from visualizer_tk import EngineVisualizerTk
 # Simulation parameters
 outside_temp = 25.0
 engines = [
-    Engine(name=f"Engine {i+1}", power=0.0, temp=30.0, heat_gen_coeff=10.0, heat_rej_coeff=0.1) for i in range(2)
+    Engine(name=f"Engine {i+1}", power=0.0, temp=30.0, heat_gen_coeff=8.0, heat_rej_coeff=0.05) for i in range(1)
 ]
 
 
 dt = 0.1  # seconds per frame
-base_power_rate = 0.2  # power per second at full key press rate
+base_power_rate = 0.1  # power per second at full key press rate
 def get_power_step():
     return base_power_rate * dt
 

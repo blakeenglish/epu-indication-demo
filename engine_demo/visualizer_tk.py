@@ -40,7 +40,20 @@ class EngineVisualizerTk:
             # Compute the power fraction for steady-state at inverter 60
         power_frac = self.engine.power_ratio_for_steady_state_temperature_for_inverter_60
         #power_frac = max(0.0, min(1.0, power_frac))
-        self.draw_power_marker(cx, cy, r, power_arc_starting_angle_in_degrees, total_arc_angle, power_frac, color='red', name='P_T60SS')
+        self.draw_power_marker(cx, cy, r, power_arc_starting_angle_in_degrees, total_arc_angle, power_frac, color='black', name='P_SST=T_I60')
+
+        power_frac = self.engine.power_ratio_for_i_60
+        #power_frac = max(0.0, min(1.0, power_frac))
+        self.draw_power_marker(cx, cy, r, power_arc_starting_angle_in_degrees, total_arc_angle, power_frac, color='black', name='P_I60')
+
+        temp_frac = self.engine.temperature_inverter_60 / (self.engine.temperature_upper_redline - self.engine.temperature_lower_redline)
+            #temp_frac = max(0.0, min(1.0, temp_frac))
+        self.draw_temperature_marker(cx, cy, r, temperature_arc_starting_angle_in_degrees, total_arc_angle, temp_frac, color='purple', name='I60')
+
+        power_frac = self.engine.power_ratio_for_vto_30
+        #power_frac = max(0.0, min(1.0, power_frac))
+        self.draw_power_marker(cx, cy, r, power_arc_starting_angle_in_degrees, total_arc_angle, power_frac, color='black', name='P_VTO_30')
+
 
         # Draw power needle
         angle = power_arc_starting_angle_in_degrees + total_arc_angle * self.engine.power
@@ -76,8 +89,9 @@ class EngineVisualizerTk:
         y1 = cy + outer * math.sin(angle_rad)
         self.canvas.create_line(x0, y0, x1, y1, fill=color, width=3)
         if name:
-            label_x = cx + (outer+10) * math.cos(angle_rad)
-            label_y = cy + (outer+10) * math.sin(angle_rad)
+            # Place label closer to the arc center
+            label_x = cx + (inner - 30) * math.cos(angle_rad)
+            label_y = cy + (inner - 30) * math.sin(angle_rad)
             self.canvas.create_text(label_x, label_y, text=name, fill=color, font=('Arial', 10, 'bold'))
         
     def draw_temperature_marker(self, cx, cy, r, arc_start_deg, arc_total_angle, temp_frac, color='purple', name=None):
