@@ -13,6 +13,7 @@ class Engine:
         self.power_ratio_for_i_60 = 0.5
         self.power_ratio_for_vto_30 = 0.8
         self.takeoff_temperature_limit = 30.0
+        self.trend_temperature = temp  # Initialize trend_temperature
 
     def update(self, outside_temp, dt=1.0):
  
@@ -35,5 +36,21 @@ class Engine:
         # Update engine temperature
         self.temp += (heat_generated - heat_rejected) * dt
 
+
+        self.calculate_trend_temperature(outside_temp, trend_time=5.0, dt=dt)
+
     def set_power(self, power):
         self.power = max(0.0, min(1.0, power))
+
+    def calculate_trend_temperature(self, outside_temp, trend_time=5.0, dt=0.1):
+        """
+        Calculate the expected engine temperature after trend_time seconds,
+        using the current power and outside temperature. Stores the result in self.trend_temperature.
+        """
+        temp = self.temp
+        steps = int(trend_time / dt)
+        for _ in range(steps):
+            heat_generated = self.heat_gen_coeff * self.power
+            heat_rejected = self.heat_rej_coeff * (temp - outside_temp)
+            temp += (heat_generated - heat_rejected) * dt
+        self.trend_temperature = temp
