@@ -5,7 +5,9 @@ from visualizer_tk import EngineVisualizerTk
 # Simulation parameters
 outside_temp = 25.0
 engines = [
-    Engine(name=f"Engine {i+1}", power=0.0, temp=30.0, heat_gen_coeff=8.0, heat_rej_coeff=0.05) for i in range(1)
+    #Engine(name=f"Engine {i+1}", power=0.0, temp=30.0, heat_gen_coeff=8.0, heat_rej_coeff=0.05) for i in range(1)
+    Engine(name=f"Limiting Engine", power=0.0, temp=30.0, heat_gen_coeff=8.0, heat_rej_coeff=0.05) for i in range(1)
+
 ]
 
 

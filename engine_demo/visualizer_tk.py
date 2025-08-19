@@ -23,7 +23,7 @@ class EngineVisualizerTk:
         temperature_arc_starting_angle_in_degrees = 225
         power_arc_starting_angle_in_degrees = 225
         # Draw gauge background
-        self.canvas.create_oval(cx-r, cy-r, cx+r, cy+r, fill='black', outline='white' if highlight else 'white', width=3 if highlight else 1)
+        #self.canvas.create_oval(cx-r, cy-r, cx+r, cy+r, fill='black', outline='white' if highlight else 'white', width=3 if highlight else 1)
         # Draw power arc (270 deg)
         self._draw_arc(cx, cy, r-20, power_arc_starting_angle_in_degrees, power_arc_starting_angle_in_degrees + total_arc_angle, width=20, color='gray25')
 
