@@ -10,7 +10,7 @@ class EngineVisualizerTk:
         self.min_temp = self.engine.temperature_lower_redline
         self.max_temp = self.engine.temperature_upper_redline
         self.padding = 160
-        self.canvas = tk.Canvas(root, width=size+self.padding, height=size+self.padding, bg='white')
+        self.canvas = tk.Canvas(root, width=size+self.padding, height=size+self.padding, bg='black')
         self.canvas.pack(side=tk.LEFT, padx=10, pady=10)
 
     def draw(self, highlight=False):
@@ -23,16 +23,16 @@ class EngineVisualizerTk:
         temperature_arc_starting_angle_in_degrees = 225
         power_arc_starting_angle_in_degrees = 225
         # Draw gauge background
-        self.canvas.create_oval(cx-r, cy-r, cx+r, cy+r, fill='#eee', outline='blue' if highlight else 'black', width=3 if highlight else 1)
+        self.canvas.create_oval(cx-r, cy-r, cx+r, cy+r, fill='black', outline='white' if highlight else 'white', width=3 if highlight else 1)
         # Draw power arc (270 deg)
-        self._draw_arc(cx, cy, r-20, power_arc_starting_angle_in_degrees, power_arc_starting_angle_in_degrees + total_arc_angle, width=20, color='#fff')
+        self._draw_arc(cx, cy, r-20, power_arc_starting_angle_in_degrees, power_arc_starting_angle_in_degrees + total_arc_angle, width=20, color='gray25')
 
         # Draw marker for takeoff temperature limit
         takeoff_temp = getattr(self.engine, 'takeoff_temperature_limit', None)
         if takeoff_temp is not None:
             temp_frac = self.engine.takeoff_temperature_limit / (self.engine.temperature_upper_redline - self.engine.temperature_lower_redline)
             #temp_frac = max(0.0, min(1.0, temp_frac))
-            self.draw_temperature_marker(cx, cy, r, temperature_arc_starting_angle_in_degrees, total_arc_angle, temp_frac, color='purple', name='T_VTO')
+            self.draw_temperature_marker(cx, cy, r, temperature_arc_starting_angle_in_degrees, total_arc_angle, temp_frac, color='white', name='T_VTO')
             
         # Draw marker for inverter 60 power
         #power_60 = getattr(self.engine, 'power_for_steady_state_temperature_for_inverter_60', None)
@@ -40,39 +40,48 @@ class EngineVisualizerTk:
             # Compute the power fraction for steady-state at inverter 60
         power_frac = self.engine.power_ratio_for_steady_state_temperature_for_inverter_60
         #power_frac = max(0.0, min(1.0, power_frac))
-        self.draw_power_marker(cx, cy, r, power_arc_starting_angle_in_degrees, total_arc_angle, power_frac, color='black', name='P_SST=T_I60')
+        self.draw_power_marker(cx, cy, r, power_arc_starting_angle_in_degrees, total_arc_angle, power_frac, color='white', name='P_SS60')
 
         power_frac = self.engine.power_ratio_for_i_60
         #power_frac = max(0.0, min(1.0, power_frac))
-        self.draw_power_marker(cx, cy, r, power_arc_starting_angle_in_degrees, total_arc_angle, power_frac, color='black', name='P_I60')
+        self.draw_power_marker(cx, cy, r, power_arc_starting_angle_in_degrees, total_arc_angle, power_frac, color='white', name='P_I60')
 
         temp_frac = self.engine.temperature_inverter_60 / (self.engine.temperature_upper_redline - self.engine.temperature_lower_redline)
             #temp_frac = max(0.0, min(1.0, temp_frac))
-        self.draw_temperature_marker(cx, cy, r, temperature_arc_starting_angle_in_degrees, total_arc_angle, temp_frac, color='purple', name='I60')
+        self.draw_temperature_marker(cx, cy, r, temperature_arc_starting_angle_in_degrees, total_arc_angle, temp_frac, color='white', name='I60')
 
         power_frac = self.engine.power_ratio_for_vto_30
         #power_frac = max(0.0, min(1.0, power_frac))
-        self.draw_power_marker(cx, cy, r, power_arc_starting_angle_in_degrees, total_arc_angle, power_frac, color='black', name='P_VTO_30')
+        self.draw_power_marker(cx, cy, r, power_arc_starting_angle_in_degrees, total_arc_angle, power_frac, color='white', name='P_VTO_30')
+        
+        power_frac = self.engine.power_ratio_for_steady_state_temperature_for_upper_redline
+        #power_frac = max(0.0, min(1.0, power_frac))
+        self.draw_power_marker(cx, cy, r, power_arc_starting_angle_in_degrees, total_arc_angle, power_frac, color='white', name='P_SSMax')
+        
 
 
         # Draw power needle
         angle = power_arc_starting_angle_in_degrees + total_arc_angle * self.engine.power
-        self._draw_needle(cx, cy, r-40, angle, color='red', width=5)
+        self._draw_needle(cx, cy, r-40, angle, color='white', width=5)
         # Draw temperature arc
         temp_pct = (self.engine.temp - self.min_temp) / (self.max_temp - self.min_temp)
         temp_angle = temperature_arc_starting_angle_in_degrees + total_arc_angle * temp_pct
-        if self.engine.temp > self.max_temp:
+        if self.engine.temp > self.max_temp * 0.95:
             arc_color = 'red'
-        elif temp_pct < 0.9:
+            self.draw_arrow(cx, cy, r*0.75, 45, 'red', -45, 40, 16)
+        elif self.engine.temp < self.engine.temperature_inverter_60:
             arc_color = 'green2'
         else:
-            arc_color = 'orange'
+            arc_color = 'yellow'
+            #self.draw_arrow(self, cx, cy, 30, 90, 'orange', 0, 20, 8)
+            self.draw_arrow(cx, cy, r*0.75, 45, 'yellow', -45, 40, 16)
+
         self._draw_arc(cx, cy, r, temperature_arc_starting_angle_in_degrees, temp_angle, width=10, color=arc_color)
         # Draw labels
-        self.canvas.create_text(cx, cy+30, text=f"{self.engine.name}", font=('Arial', 16, 'bold'))
-        self.canvas.create_text(cx, cy-20, text=f"Power: {int(self.engine.power*100)}%", font=('Arial', 12))
-        self.canvas.create_text(cx, cy+60, text=f"Temp: {self.engine.temp:.1f}°C", font=('Arial', 12))
-        self.canvas.create_text(cx, cy+80, text=f"Power 60: {self.engine.power_ratio_for_steady_state_temperature_for_inverter_60:.1f}%", font=('Arial', 12))
+        self.canvas.create_text(cx, cy+100, text=f"{self.engine.name}", font=('Arial', 16, 'bold'), fill='white')
+        self.canvas.create_text(cx, cy+70, text=f"Power: {int(self.engine.power*100)}%", font=('Arial', 12), fill='white')
+        self.canvas.create_text(cx, cy+130, text=f"Temp: {self.engine.temp:.1f}%", font=('Arial', 12), fill='white')
+        #self.canvas.create_text(cx, cy+80, text=f"Power 60: {self.engine.power_ratio_for_steady_state_temperature_for_inverter_60:.1f}%", font=('Arial', 12), fill='white')
 
     def draw_power_marker(self, cx, cy, r, arc_start_deg, arc_total_angle, power_frac, color='blue', name=None):
         """
@@ -141,3 +150,35 @@ class EngineVisualizerTk:
         x = cx + length * math.cos(angle_rad)
         y = cy + length * math.sin(angle_rad)
         self.canvas.create_line(cx, cy, x, y, fill=color, width=width)
+
+    def draw_arrow(self, cx, cy, base_radius, base_angle_deg, arrow_color, arrow_angle_deg, length, width):
+        """
+        Draw a small arrow on the gauge.
+        cx, cy: center of gauge
+        base_radius: distance from center to base of arrow
+        base_angle_deg: angle (degrees, 0=up, increases clockwise) for base location
+        arrow_color: color of the arrow
+        arrow_angle_deg: orientation of the arrow (degrees, 0=up, increases clockwise)
+        length: length of the arrow
+        width: width of the arrow head
+        """
+        # Compute base point
+        base_angle_rad = math.radians(base_angle_deg - 90)
+        bx = cx + base_radius * math.cos(base_angle_rad)
+        by = cy + base_radius * math.sin(base_angle_rad)
+        # Arrow direction
+        arrow_angle_rad = math.radians(arrow_angle_deg - 90)
+        # Tip of arrow
+        tx = bx + length * math.cos(arrow_angle_rad)
+        ty = by + length * math.sin(arrow_angle_rad)
+        # Arrowhead points
+        left_angle = arrow_angle_rad + math.radians(150)
+        right_angle = arrow_angle_rad - math.radians(150)
+        lx = tx + width * math.cos(left_angle)
+        ly = ty + width * math.sin(left_angle)
+        rx = tx + width * math.cos(right_angle)
+        ry = ty + width * math.sin(right_angle)
+        # Draw main line
+        self.canvas.create_line(bx, by, tx, ty, fill=arrow_color, width=3)
+        # Draw arrowhead
+        self.canvas.create_polygon([tx, ty, lx, ly, rx, ry], fill=arrow_color)

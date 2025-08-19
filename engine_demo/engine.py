@@ -9,6 +9,7 @@ class Engine:
         self.temperature_lower_redline = 0
         self.temperature_inverter_60 = 50.0
         self.power_ratio_for_steady_state_temperature_for_inverter_60 = 0.5
+        self.power_ratio_for_steady_state_temperature_for_upper_redline = 0.5
         self.power_ratio_for_i_60 = 0.5
         self.power_ratio_for_vto_30 = 0.8
         self.takeoff_temperature_limit = 30.0
@@ -18,6 +19,10 @@ class Engine:
         target_temp = self.temperature_inverter_60
         required_power = (self.heat_rej_coeff * (target_temp - outside_temp)) / self.heat_gen_coeff
         self.power_ratio_for_steady_state_temperature_for_inverter_60 = max(0.0, min(1.0, required_power))
+        
+        target_temp = self.temperature_upper_redline
+        required_power = (self.heat_rej_coeff * (target_temp - outside_temp)) / self.heat_gen_coeff
+        self.power_ratio_for_steady_state_temperature_for_upper_redline = max(0.0, min(1.0, required_power))
         
         
         self.takeoff_temperature_limit = outside_temp + 10
