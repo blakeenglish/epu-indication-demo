@@ -5,6 +5,9 @@ class Engine:
         self.temp = temp
         self.heat_gen_coeff = heat_gen_coeff
         self.heat_rej_coeff = heat_rej_coeff
+        self.temperature_upper_redline = 100.0
+        self.temperature_lower_redline = 0
+        self.temperature_inverter_60 = 50.0
 
     def update(self, outside_temp, dt=1.0):
         # Heat generated is proportional to power
